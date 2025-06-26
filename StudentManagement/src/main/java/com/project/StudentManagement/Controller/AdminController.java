@@ -106,4 +106,10 @@ public class AdminController {
 		studentService.deleteStudentById(id);
 		return "redirect:/admin/students";
 	}
+	 @GetMapping("/students/search")
+	    public String searchStudents(@RequestParam String keyword, Model model) {
+	        List<Student> students = studentService.searchStudents(keyword);
+	        model.addAttribute("students", students);
+	        return "student-search-results";
+	    }
 }

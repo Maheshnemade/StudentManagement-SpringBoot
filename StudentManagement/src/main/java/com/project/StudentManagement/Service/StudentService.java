@@ -1,6 +1,7 @@
 package com.project.StudentManagement.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -91,7 +92,12 @@ public class StudentService {
 
 	    return studentRepository.save(existingStudent);
 	}
-
+	 public List<Student> searchStudents(String keyword) {
+	        return studentRepository.findAll().stream()
+	                .filter(student -> student.getName().toLowerCase().contains(keyword.toLowerCase())
+	                        || student.getEmail().toLowerCase().contains(keyword.toLowerCase()))
+	                .collect(Collectors.toList());
+	    }
 
 	
 	
