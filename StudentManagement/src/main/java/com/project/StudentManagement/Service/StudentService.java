@@ -1,10 +1,12 @@
 package com.project.StudentManagement.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.project.StudentManagement.Model.Course;
 import com.project.StudentManagement.Model.Student;
 import com.project.StudentManagement.Model.User;
 import com.project.StudentManagement.Repository.StudentRepository;
@@ -14,18 +16,38 @@ import jakarta.transaction.Transactional;
 @Service
 public class StudentService {
 	
-	private final StudentRepository studentRepository; 
+	 private final StudentRepository studentRepository;
+	    private final CourseService courseService;
+	    private final UserService userService;
 
-	public StudentService(StudentRepository studentRepository) {
-		this.studentRepository = studentRepository;
-	}
-	@Transactional
-	public Student addStudent(Student student) {
-		if (studentRepository.findByEmail(student.getEmail()).isPresent()) {
-			throw new RuntimeException("Email already exists!");
-		}
-		return studentRepository.save(student);
-	}
+	    public StudentService(StudentRepository studentRepository,
+	                          CourseService courseService,
+	                          UserService userService) {
+	        this.studentRepository = studentRepository;
+	        this.courseService = courseService;
+	        this.userService = userService;
+	    }
+	
+	  @Transactional
+	    public Student addStudent(Map<String, Object> payload) {
+	        Student student = new Student();
+	        student.setName((String) payload.get("name"));
+	        student.setEmail((String) payload.get("email"));
+	        student.setPhoneNumber((String) payload.get("phoneNumber"));
+	        student.setAddress((String) payload.get("address"));
+	        student.setAge((Integer) payload.get("age"));
+	        student.setGender((String) payload.get("gender"));
+
+	        Long courseId = Long.valueOf(payload.get("courseId").toString());
+	        Course course = courseService.getCourseById(courseId); 
+	        student.setCourse(course);
+
+	        Long userId = Long.valueOf(payload.get("userId").toString());
+	        User user = userService.getUserById(userId); 
+	        student.setUser(user);
+
+	        return studentRepository.save(student);
+	    }
 	
 	public List<Student> getAllStudents(){
 		return studentRepository.findAll();
@@ -92,12 +114,30 @@ public class StudentService {
 
 	    return studentRepository.save(existingStudent);
 	}
-	 public List<Student> searchStudents(String keyword) {
-	        return studentRepository.findAll().stream()
-	                .filter(student -> student.getName().toLowerCase().contains(keyword.toLowerCase())
-	                        || student.getEmail().toLowerCase().contains(keyword.toLowerCase()))
-	                .collect(Collectors.toList());
-	    }
+	public List<Student> searchStudents(String keyword) {
+	    String searchKey = keyword.toLowerCase();
+
+	    return studentRepository.findAll().stream()
+	            .filter(student ->
+	                    (student.getName() != null &&
+	                     student.getName().toLowerCase().contains(searchKey))
+
+	                 || (student.getEmail() != null &&
+	                     student.getEmail().toLowerCase().contains(searchKey))
+
+	                 || (student.getAddress() != null &&
+	                     student.getAddress().toLowerCase().contains(searchKey))
+
+	                 || (student.getPhoneNumber() != null &&
+	                     student.getPhoneNumber().contains(searchKey))
+	            )
+	            .collect(Collectors.toList());
+	}
+	 
+	 @Transactional
+	 public Student addStudent(Student student) {
+	     return studentRepository.save(student);
+	 }
 
 	
 	

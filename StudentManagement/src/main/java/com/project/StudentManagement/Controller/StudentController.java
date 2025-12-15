@@ -1,63 +1,42 @@
 package com.project.StudentManagement.Controller;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
 
 import com.project.StudentManagement.Model.Student;
 import com.project.StudentManagement.Model.User;
 import com.project.StudentManagement.Service.StudentService;
 import com.project.StudentManagement.Service.UserService;
 
-@Controller
+@RestController
 @RequestMapping("/student")
+@CrossOrigin(origins = "http://localhost:3002", allowCredentials = "true")
 public class StudentController {
-	
-	private final StudentService studentService;
-	private final UserService userService;
-	public StudentController(StudentService studentService, UserService userService) {
-        this.studentService = studentService;
-        this.userService = userService;
+
+    @Autowired
+    private StudentService studentService;
+
+    @Autowired
+    private UserService userService;
+
+    @GetMapping("/profile")
+    public Student getProfile() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userService.findByUsername(username);   // Correct method
+        return studentService.findByUser(user);
     }
-	
-	
-	@GetMapping("/dashboard")
-	public String showStudentDashboard(Model model) {
-	    User currentUser = userService.getLoggedInUser();
-	    Student student = studentService.findByUser(currentUser);
-	    model.addAttribute("student", student);
-	    return "student-dashboard"; 
-	}
-	
-	@GetMapping("/edit")
-	public String editStudentForm(Model model) {
-		User currentUser = userService.getLoggedInUser();
-		Student student = studentService.findByUser(currentUser);
-		model.addAttribute("student", student);
-		model.addAttribute("isAdmin", false);
-		return "edit-student";
-	}
-	
-	@PostMapping("/edit")
-	public String updateStudent(@ModelAttribute("student") Student updatedStudent) {
-	    User currentUser = userService.getLoggedInUser();
-	    Student existingStudent = studentService.findByUser(currentUser);
 
-	    updatedStudent.setId(existingStudent.getId()); 
-	    updatedStudent.setUser(currentUser);          
-	    updatedStudent.setCourse(existingStudent.getCourse()); 
+    @PutMapping("/edit")
+    public Student updateStudent(@RequestBody Student updated) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userService.findByUsername(username);
 
-	    studentService.updateStudent(updatedStudent);
-	    return "redirect:/student/dashboard";
-	}
-	
-//	Email Confirmation
-//	Send a confirmation mail after successful registration using Spring Mail.
-//
-//	Export to CSV/Excel
-//	Admin can download student list with course info for reporting.
-	
+        Student existing = studentService.findByUser(user);
+
+        updated.setId(existing.getId()); 
+        updated.setUser(user);           
+
+        return studentService.updateStudent(updated);
+    }
 }

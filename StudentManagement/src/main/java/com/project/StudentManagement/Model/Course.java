@@ -2,6 +2,8 @@ package com.project.StudentManagement.Model;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -20,6 +22,7 @@ public class Course {
 	    private String courseName;
 
 	    @OneToMany(mappedBy = "course") 
+	    @JsonManagedReference
 	    private List<Student> students;
 
 	    public Course() {}

@@ -84,6 +84,17 @@ public class UserService {
 	            System.out.println("Admin user created: " + adminUsername);
 	        }
 	    }
+	    
+	    public User findByUsername(String username) {
+	        return userRepository.findByUsername(username)
+	                .orElseThrow(() -> new RuntimeException("User not found"));
+	    }
+	    
+	    @Transactional
+	    public User getUserById(Long id) {
+	        return userRepository.findById(id)
+	                .orElseThrow(() -> new RuntimeException("User not found with ID: " + id));
+	    }
 	
 	
 }

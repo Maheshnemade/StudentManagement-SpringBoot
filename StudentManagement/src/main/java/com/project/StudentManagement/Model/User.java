@@ -3,6 +3,8 @@ package com.project.StudentManagement.Model;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -10,6 +12,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
@@ -33,6 +36,10 @@ public class User {
 	    
 	    @Column(name = "registration_date", nullable = false, updatable = false)
 	    private LocalDateTime registrationDate;
+	    
+	    @JsonIgnore
+	    @OneToOne(mappedBy = "user")
+	    private Student student;
 
 	    @PrePersist
 	    protected void onCreate() {

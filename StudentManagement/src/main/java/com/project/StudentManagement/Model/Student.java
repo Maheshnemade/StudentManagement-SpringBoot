@@ -1,7 +1,10 @@
 package com.project.StudentManagement.Model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -32,8 +35,12 @@ public class Student {
 	@Min(value = 18, message = "Age must be positive")
 	private Integer age;
 	
-	@ManyToOne
+	@Column(nullable = false)
+	private String gender;
+	
+	@ManyToOne(fetch = FetchType.EAGER) 
 	@JoinColumn(name = "course_id")
+	@JsonBackReference
 	private Course course;
 	
 	
@@ -46,8 +53,13 @@ public class Student {
 	}
 
 	
-	public Student(Long id, String name, String email, String phoneNumber, String address, Integer age, 
-			Course course, User user) {
+	
+	
+
+	public Student(Long id, @NotNull @Size(min = 3, message = "Name must be at least 2 characters") String name,
+			@Email String email,
+			@Size(min = 10, max = 10, message = "Phone number must be 10 digits") String phoneNumber, String address,
+			@Min(value = 18, message = "Age must be positive") Integer age, String gender, Course course, User user) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -55,11 +67,18 @@ public class Student {
 		this.phoneNumber = phoneNumber;
 		this.address = address;
 		this.age = age;
+		this.gender = gender;
 		this.course = course;
 		this.user = user;
 	}
 
-	
+	public String getGender() {
+		return gender;
+	}
+
+	public void setGender(String gender) {
+		this.gender = gender;
+	}
 
 	public Integer getAge() {
 		return age;
@@ -69,6 +88,8 @@ public class Student {
 	public void setAge(Integer age) {
 		this.age = age;
 	}
+	
+	
 
 
 	public Course getCourse() {
